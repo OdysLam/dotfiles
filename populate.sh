@@ -3,7 +3,7 @@
 cp .vimrc ~/.vimrc
 cp .zshrc ~/.zshrc
 cp .zshenv ~/.zshenv
-cp .tmux.conf ~/tmux.conf
+cp .tmux.conf.local ~/tmux.conf.local
 cp .gitconfig ~/.gitconfig
 cp .gitignore ~/.gitignore
 cp .dircolors ~/.dircolors
