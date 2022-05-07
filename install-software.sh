@@ -1,73 +1,73 @@
 #!/usr/bin/env bash
+set -e
 
+source ./install-software-mac.sh
+source ./install-software-eth.sh
+source ./sync.sh
 
-# Oh my tmux
- cd
- git clone https://github.com/gpakosz/.tmux.git
- ln -s -f .tmux/.tmux.conf
- cp .tmux/.tmux.conf.local .
+message() {
 
-# Oh my zsh
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-# Populate secrets
-echo -e "export BALENA_TOKEN=\nexport ETHERSCAN_API_KEY\nexport ETH_RPC_URL=" > ~/.zsh/zsh_secrets
-
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-brew update
-brew upgrade
-
-# Add radicle tap
-brew tap radicle/cli https://seed.alt-clients.radicle.xyz/radicle-cli-homebrew.git
-
-apps=(
-  node
-  ag
-  bat
-  exa
-  git
-  git-delta
-  git-extras
-  htop
-  python3
-  tree
-  wget
-  yarn
-  libusb
-  radicle/cli/core
-  cloudflare-wrangler
-)
-
-for app in ${apps[*]}
-  do
-    brew install "${app}"
+    echo
+    echo -----------------------------------------------------------------------------
+    echo -e "$@"
+    echo -----------------------------------------------------------------------------
+    echo
+}
+welcome="
+ _______________________________
+< Welcome to Odysseas' dotfiles >
+ -------------------------------
+    \
+     \
+              .,-:;//;:=,
+          . :H@@@MM@M#H/.,+%;,
+       ,/X+ +M@@M@MM%=,-%HMMM@X/,
+     -+@MM; $M@@MH+-,;XMMMM@MMMM@+-
+    ;@M@@M- XM@X;. -+XXXXXHHH@M@M#@/.
+  ,%MM@@MH ,@%=            .---=-=:=,.
+  =@#@@@MX .,      WE      -%HX$$%%%+;
+ =-./@M@M$         DO       .;@MMMM@MM:
+ X@/ -$MM/        WHAT        .+MM@@@M$
+,@M@H: :@:         WE         . =X#@@@@-
+,@@@MMX, .        MUST        /H- ;@M@M=
+.H@@@@M@+,      BECAUSE       %MM+..%#$.
+ /MMMM@MMH/.       WE         XM@MH; =;
+  /%+%$XHH@$=     CAN      , .H@@@@MX,
+   .=--------.           -%H.,@@@@@MX,
+   .%MM@@@HHHXX$$$%+- .:$MMX =M@@MM%.
+     =XMMM@MM@MM#H;,-+HMM@M+ /MMMX=
+       =%@M@M#@$-.=$@MM@@@M; %M%=
+         ,:+$+-,/H#MMMMMMM@= =,
+               =++%%%%+/:-.
+"
+message "$welcome"
+while getopts 'ad' OPTION; do
+  case "$OPTION" in
+    a) install="all"
+    d) install="dotfiles"
+    ?) echo "print_usage"
 done
 
-casks=(
-  flux
-  raycast
-  docker
-  slack
-  spotify
-  discord
-  cron
-  signal
-  telegram
-  whatsapp
-  brave-browser
-  todoist
-  rotki
-  cask
-  private-internet-access
-)
+if [[ $install == "all" ]]; then
 
-for app in ${casks[*]}
-  do
-    brew install --cask "${cask}"
-done
+  if [[ $OSTYPE == 'darwin'* ]]; then
+    message "macOS detected. Installating macOS software & apps"
+    if ! [ -x "$(which brew)" ]; then
+      message "Installing brew"
+      /usr/bin/ruby -e \
+        "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+    fi
+    install_software_mac
+  fi
 
-export DOTFILES_BREW_PREFIX_COREUTILS=`brew --prefix coreutils`
-set-config "DOTFILES_BREW_PREFIX_COREUTILS" "$DOTFILES_BREW_PREFIX_COREUTILS" "$DOTFILES_CACHE"
+  message "Installing Ethereum development toolchain"
+  install_software_eth
 
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-
-xcode-select --install
+  message "Installing Rust toolchain"
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+elif [[ $install == "dotfiles" ]]; then
+  message "Installing dotfiles"
+  message "Please visit ~/.zsh/zsh_secrets and populate your API keys"
+  echo -e "export BALENA_TOKEN=\nexport ETHERSCAN_API_KEY\nexport ETH_RPC_URL=" > ~/.zsh/zsh_secrets
+  sync local
+fi
